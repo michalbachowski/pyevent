@@ -67,13 +67,13 @@ class Event(object):
         """
         Allows to treat class instances as dicts
         """
-        self.parameters[key] = value
+        raise RuntimeError('Event is read-only')
 
     def __delitem__(self, key):
         """
         Allows to treat class instances as dicts
         """
-        del self.parameters[key]
+        raise RuntimeError('Event is read-only')
 
     def __contains__(self, item):
         """
