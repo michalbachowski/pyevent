@@ -173,8 +173,12 @@ class Listener(object):
         """
         Registers event listeners to given dispatcher
         """
-        for (event, callback, priority) in self.mapping.iteritems():
-            dispatcher.connect(event, callback, priority)
+        for t in self.mapping.iteritems():
+            try:
+                priority = t[2]
+            except IndexError:
+                priority = 100
+            dispatcher.connect(t[0], t[1], priority)
 
     @property
     def mapping(self):
@@ -182,7 +186,8 @@ class Listener(object):
         Returns list of listeners to be attached to dispatcher.
         [(event name, listener, priority), (event name, listener, priority)]
         """
-        raise NotImplementedError('Return list of event=>callback mappings')
+        raise NotImplementedError('Return list of tuples with ' +\
+            '(event, callback priority) mappings')
 
 
 def test():
