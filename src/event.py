@@ -75,18 +75,6 @@ class Event(object):
         """
         del self.parameters[key]
 
-    def __iter__(self):
-        """
-        Allows to treat class instances as dicts
-        """
-        return self.parameters
-
-    def __reversed__(self):
-        """
-        Allows to treat class instances as dicts
-        """
-        return self.parameters.__reversed__()
-
     def __contains__(self, item):
         """
         Allows to treat class instances as dicts
