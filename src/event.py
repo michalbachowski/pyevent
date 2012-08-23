@@ -161,14 +161,13 @@ class Listener(object):
         """
         Registers event listeners to given dispatcher
         """
-        for t in self.mapping.iteritems():
+        for t in self.mapping():
             try:
                 priority = t[2]
             except IndexError:
                 priority = 100
-            dispatcher.connect(t[0], t[1], priority)
+            dispatcher.attach(t[0], t[1], priority)
 
-    @property
     def mapping(self):
         """
         Returns list of listeners to be attached to dispatcher.
