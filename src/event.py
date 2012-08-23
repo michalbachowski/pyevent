@@ -188,22 +188,3 @@ class Listener(object):
         """
         raise NotImplementedError('Return list of tuples with ' +\
             '(event, callback priority) mappings')
-
-
-def test():
-    def foo(e):
-        print ('foo', e.name)
-
-    def bar(e):
-        print ('bar', e.name)
-
-    d = Dispatcher()
-    d.attach('test', bar, 2)
-    d.attach('test', foo, 1)
-
-    e = Event(None, 'test', {'a': 1})
-    d.notify(e)
-
-
-if '__main__' == __name__:
-    test()
