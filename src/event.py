@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import heapq
 import itertools
+from functools import partial
 
 
 class Event(object):
@@ -124,32 +125,83 @@ class Dispatcher(object):
             return []
         return (l[2] for l in self._listeners[name])
 
-    def notify(self, event):
+    def notify(self, event, callback=None):
         """
         Notifies each listener about new event
         """
+        # asynchronous call
+        if callback:
+            return self._async_notify(self.get_listeners(event.name), \
+                event, callback)
+        # synchronous call
         for listener in self.get_listeners(event.name):
             listener(event)
-        return event;
+        return event
+    
+    def _async_notify(self, listeners, event, callback):
+        """
+        Notifies each listener about new event in asynchronous manner
+        """
+        try:
+            listeners.next()(event, partial(self._async_notify, \
+                listeners, event, callback=callback))
+        except StopIteration:
+            callback(event)
 
-    def notify_until(self, event):
+    
+    def notify_until(self, event, callback=None):
         """
         Notifies listeners about new event until any of then returns True
         """
+        # asynchronous call
+        if callback:
+            return self._async_notify_until(self.get_listeners(event.name), \
+                event, False, callback)
+        # synchronous call
         for listener in self.get_listeners(event.name):
             if listener(event):
                 event.mark_processed()
                 break
         return event
 
-    def filter(self, event, value):
+    def _async_notify_until(self, listeners, event, value, callback):
+        """
+        Notifies listeners about new event until any of then returns True 
+        in asynchronous manner
+        """
+        try:
+            if value:
+                event.mark_processed()
+                raise StopIteration
+            listeners.next()(event, partial(self._async_notify_until, \
+                listeners, event, callback=callback))
+        except StopIteration:
+            callback(event)
+
+    def filter(self, event, value, callback=None):
         """
         Filters given value using given event
         """
+        # asynchronous call
+        if callback:
+            return self._async_filter(self.get_listeners(event.name), event, \
+                value, callback)
+        # synchronous call
         for listener in self.get_listeners(event.name):
             value = listener(event, value)
         event.return_value = value
         return event
+
+    def _async_filter(self, listeners, event, value, callback):
+        """
+        Filters given value using given event in asynchronous manner
+        """
+        try:
+            listeners.next()(event, value, partial(self._async_filter, \
+                listeners, event, callback=callback))
+        except StopIteration:
+            event.return_value = value
+            callback(event)
 
 
 class Listener(object):
