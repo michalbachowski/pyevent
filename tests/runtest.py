@@ -8,7 +8,7 @@ import unittest
 import _path
 _path.fix()
 
-TEST_MODULES = ['event_test']
+TEST_MODULES = ['event_test', 'dispatcher_test', 'listener_test']
 
 
 def all():
