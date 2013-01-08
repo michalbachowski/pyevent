@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import heapq
 import itertools
-from functools import partial
+from functools import partial, wraps
 
 
 class Event(object):
@@ -227,3 +227,35 @@ class Listener(object):
         """
         raise NotImplementedError('Return list of tuples with ' +\
             '(event, callback priority) mappings')
+
+
+def synchronous(function):
+    """
+    Decorator that marks event listeners as synchronous
+    It allows handling callback (passed when event is invoced asynchronously)
+    """
+    @wraps(function)
+    def wrapper(self, event, *args, **kwargs):
+        callback = None
+        if 'callback' in kwargs:
+            callback = kwargs['callback']
+            del kwargs['callback']
+        ret = function(self, event, *args, **kwargs)
+        if callback:
+            callback(ret)
+        return ret
+    return wrapper
+
+
+def asynchronous(function):
+    """
+    Decorator that marks event listeners as asynchronous
+    It raises exception when callback is not passed!
+    """
+    @wraps(function)
+    def wrapper(self, event, *args, **kwargs):
+        if not 'callback' in kwargs:
+            raise RuntimeError('"callback" is required when calling %s' % \
+                function)
+        function(self, event, *args, **kwargs)
+    return wrapper

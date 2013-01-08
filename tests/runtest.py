@@ -9,7 +9,7 @@ import _path
 _path.fix()
 
 TEST_MODULES = ['event_test', 'dispatcher_test', 'dispatcher_async_test',\
-    'listener_test']
+    'listener_test', 'decorators_test']
 
 
 def all():
