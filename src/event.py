@@ -213,6 +213,8 @@ class Listener(object):
         """
         Registers event listeners to given dispatcher
         """
+        self.dispatcher = dispatcher
+
         for t in self.mapping():
             try:
                 priority = t[2]
