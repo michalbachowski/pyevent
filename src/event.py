@@ -102,6 +102,8 @@ class Dispatcher(object):
         if name not in self._listeners:
             self._listeners[name] = []
         heapq.heappush(self._listeners[name], self._prepare(listener, priority))
+        # sort list in order to iterate over elements (heapq changes order)
+        self._listeners[name].sort()
 
     def _prepare(self, listener, priority=0):
         """
