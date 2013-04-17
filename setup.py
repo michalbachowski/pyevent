@@ -3,6 +3,10 @@
 
 from distutils.core import setup
 
+# monkey patch os.link to force using symlinks
+import os
+del os.link
+
 setup(name='PyEvent',\
     url='https://github.com/michalbachowski/pyevent',\
     version='1.0',\
