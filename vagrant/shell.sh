@@ -5,8 +5,20 @@
 
 # install ctags
 if [ -x /usr/bin/apt-get ]; then
+    # update packages
+    apt-get update
     # ctags
     apt-get install exuberant-ctags 
+    # python3
+    apt-get install python3.2 python3.2-minimal
+fi
+
+# install ctags
+if [ -x /usr/local/bin/pip ]; then
+    # tox
+    pip install tox
+    # coverage
+    pip install coverage
 fi
 
 # configure environment
