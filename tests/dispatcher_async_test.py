@@ -15,7 +15,7 @@ _path.fix()
 ##
 # event modules
 #
-from event import Event, Dispatcher, Listener
+from pyevent import Event, Dispatcher, Listener
 
 
 class DispatcherAsyncTestCase(unittest.TestCase):
@@ -23,7 +23,7 @@ class DispatcherAsyncTestCase(unittest.TestCase):
     def setUp(self):
         self.mox = mox.Mox()
         self.event = self.mox.CreateMock(Event)
-    
+
     def tearDown(self):
         self.mox.UnsetStubs()
 
@@ -42,7 +42,7 @@ class DispatcherAsyncTestCase(unittest.TestCase):
         listener.foo(mox.IsA(Event), mox.IsA(partial)).WithSideEffects(cb)
         listener.mapping().AndReturn([('foo', listener.foo),\
             ('foo', listener.foo)])
-        
+
         # prepare callback
         callback = self.mox.CreateMockAnything()
         callback(self.event)
@@ -81,11 +81,11 @@ class DispatcherAsyncTestCase(unittest.TestCase):
         listener.mapping().AndReturn([('foo', listener.foo),\
             ('foo', listener.bar),\
             ('foo', listener.foo)])
-        
+
         # prepare callback
         callback = self.mox.CreateMockAnything()
         callback(self.event)
-       
+
         # start test
         self.mox.ReplayAll()
         listener.register(d)
@@ -116,7 +116,7 @@ class DispatcherAsyncTestCase(unittest.TestCase):
         listener.mapping().AndReturn([('foo', listener.foo),\
             ('foo', listener.bar),\
             ('foo', listener.foo)])
-        
+
         # prepare callback
         callback = self.mox.CreateMockAnything()
         callback(self.event)

@@ -14,7 +14,7 @@ _path.fix()
 ##
 # event modules
 #
-from event import Event, Dispatcher, Listener
+from pyevent import Event, Dispatcher, Listener
 
 
 class DispatcherTestCase(unittest.TestCase):
@@ -22,7 +22,7 @@ class DispatcherTestCase(unittest.TestCase):
     def setUp(self):
         self.mox = mox.Mox()
         self.event = self.mox.CreateMock(Event)
-    
+
     def tearDown(self):
         self.mox.UnsetStubs()
 
@@ -42,7 +42,7 @@ class DispatcherTestCase(unittest.TestCase):
         except TypeError:
             err = True
         self.assertTrue(err)
-    
+
     def test_attach_requires_2_arguments_1(self):
         err = False
         e = Dispatcher()
@@ -51,7 +51,7 @@ class DispatcherTestCase(unittest.TestCase):
         except TypeError:
             err = True
         self.assertTrue(err)
-    
+
     def test_attach_accepts_3_arguments_1(self):
         err = False
         e = Dispatcher()

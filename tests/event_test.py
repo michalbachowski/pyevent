@@ -13,7 +13,7 @@ _path.fix()
 ##
 # event modules
 #
-from event import Event
+from pyevent import Event
 
 
 class EventTestCase(unittest.TestCase):
@@ -49,7 +49,7 @@ class EventTestCase(unittest.TestCase):
         except TypeError:
             err = True
         self.assertFalse(err)
-        
+
     def test_init_does_not_check_input_arguments(self):
         err = False
         try:
@@ -57,7 +57,7 @@ class EventTestCase(unittest.TestCase):
         except:
             err = True
         self.assertFalse(err)
-        
+
     def test_init_state(self):
         e = Event('a', 'b')
         self.assertEqual('a', e.subject)

@@ -14,7 +14,7 @@ _path.fix()
 ##
 # event modules
 #
-from event import Dispatcher, Listener
+from pyevent import Dispatcher, Listener
 
 
 class ListenerTestCase(unittest.TestCase):
@@ -22,7 +22,7 @@ class ListenerTestCase(unittest.TestCase):
     def setUp(self):
         self.mox = mox.Mox()
         self.dispatcher = self.mox.CreateMock(Dispatcher)
-    
+
     def tearDown(self):
         self.mox.UnsetStubs()
 

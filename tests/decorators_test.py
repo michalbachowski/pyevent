@@ -14,17 +14,17 @@ _path.fix()
 ##
 # event modules
 #
-from event import synchronous, asynchronous
+from pyevent import synchronous, asynchronous
 
 
 class DecoratorsTestCase(unittest.TestCase):
 
     def setUp(self):
         self.mox = mox.Mox()
-    
+
     def tearDown(self):
         self.mox.UnsetStubs()
-    
+
     @synchronous
     def sync_notify(self, event):
         return True
@@ -60,11 +60,11 @@ class DecoratorsTestCase(unittest.TestCase):
         callback(True)
 
         self.mox.ReplayAll()
-        
+
         self.async_notify('foo', callback=callback)
-        
+
         self.mox.VerifyAll()
-    
+
     @synchronous
     def sync_filter(self, event, val):
         return val
@@ -90,9 +90,9 @@ class DecoratorsTestCase(unittest.TestCase):
         callback('bar')
 
         self.mox.ReplayAll()
-        
+
         self.async_filter('foo', 'bar', callback=callback)
-        
+
         self.mox.VerifyAll()
 
 
