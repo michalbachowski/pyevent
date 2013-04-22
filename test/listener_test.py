@@ -13,7 +13,7 @@ fix()
 ##
 # test helper
 #
-from mock_helper import *
+from mock_helper import IsA
 
 ##
 # event modules
