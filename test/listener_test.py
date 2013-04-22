@@ -5,11 +5,15 @@
 # python standard library
 #
 import unittest
-import mox
 
 # hack for loading modules
-import _path
-_path.fix()
+from _path import fix, mock
+fix()
+
+##
+# test helper
+#
+from mock_helper import *
 
 ##
 # event modules
@@ -20,27 +24,32 @@ from pyevent import Dispatcher, Listener
 class ListenerTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.mox = mox.Mox()
-        self.dispatcher = self.mox.CreateMock(Dispatcher)
+        self.dispatcher = Dispatcher()
 
-    def tearDown(self):
-        self.mox.UnsetStubs()
-
-    def test_register_uses_mapping(self):
+    def test_register_expects_mapping_to_be_implemented(self):
         # prepare listener
         listener = Listener()
-        self.mox.StubOutWithMock(listener, 'mapping')
-        listener.mapping().AndReturn([('foo', None, 2)])
 
-        # prepare dispatcher
-        self.dispatcher.attach('foo', None, 2)
-        self.mox.ReplayAll()
+        # test
+        err = False
+        try:
+            listener.register(None)
+        except RuntimeError:
+            err = True
+        self.assertTrue(err)
+
+    def test_register_calls_dispatcher_attach_method(self):
+        # prepare listener
+        listener = Listener()
+
+        listener.mapping = lambda: [('a', 1)]
+        self.dispatcher.attach = mock.MagicMock()
 
         # test
         listener.register(self.dispatcher)
 
-        # verify
-        self.mox.VerifyAll()
+        # validate
+        self.dispatcher.attach.assert_called_once_with('a', 1, IsA(int))
 
 
 if "__main__" == __name__:
