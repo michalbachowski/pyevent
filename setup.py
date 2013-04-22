@@ -16,6 +16,6 @@ setup(name='PyEvent',
     author='Michał Bachowski',
     author_email='michal@bachowski.pl',
     package_dir={'': 'src'},
-    packages=['pyevent'],
+    py_modules=['pyevent'],
     install_requires='PyPromise==1.0.3',
     dependency_links = ['http://github.com/michalbachowski/pypromise/archive/1.0.3.zip#egg=PyPromise-1.0.3'])
