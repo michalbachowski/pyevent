@@ -52,6 +52,7 @@ class DecoratorsTestCase(unittest.TestCase):
 
     def test_synchronous_allows_to_pass_more_then_2_arguments(self):
         cb = mock.MagicMock(return_value='asd')
+        cb.__name__ = 'callback'
         d = mock.MagicMock()
         d.resolve = mock.MagicMock()
         synchronous(cb)('foo', d, 'baz', 1, 2, d='f')
