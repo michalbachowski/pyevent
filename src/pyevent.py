@@ -140,7 +140,7 @@ class Dispatcher(object):
                         deferred=deferred))\
                     .fail(deferred.fail)
         except StopIteration:
-            deferred.done(event)
+            deferred.resolve(event)
 
 
 class Listener(object):
