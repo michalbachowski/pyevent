@@ -115,7 +115,7 @@ class Dispatcher(object):
             self._dirty = False
             self._listeners[name].sort()
         if name not in self._listeners:
-            return []
+            return iter([])
         return (l[2] for l in self._listeners[name])
 
     def notify(self, name, event):
@@ -125,20 +125,22 @@ class Dispatcher(object):
         event.start_propagation().name = name
         # asynchronous call
         return Deferred(partial(self._async_notify, self.get_listeners(name),
-                event))
+                event)).promise()
 
     def _async_notify(self, listeners, event, deferred):
         """
         Notifies listeners about new event until any of then returns True
         in asynchronous manner
         """
-        if event.is_propagation_stopped():
-            deferred.done()
-            return
-        Deferred(partial(listeners.next(), event))\
-                .done(partial(self._async_notify, listeners, event,
+        try:
+            if event.is_propagation_stopped():
+                raise StopIteration()
+            Deferred(partial(next(listeners), event))\
+                    .done(partial(self._async_notify, listeners, event,
                         deferred=deferred))\
-                .fail(deferred.fail)
+                    .fail(deferred.fail)
+        except StopIteration:
+            deferred.done(event)
 
 
 class Listener(object):
