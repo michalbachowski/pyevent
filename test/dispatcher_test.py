@@ -5,11 +5,20 @@
 # python standard library
 #
 import unittest
-import mox
 
 # hack for loading modules
-import _path
-_path.fix()
+from _path import fix, mock
+fix()
+
+##
+# test helper
+#
+from mock_helper import IsA
+
+##
+# pypromise modules
+#
+from promise import Deferred, Promise
 
 ##
 # event modules
@@ -17,14 +26,13 @@ _path.fix()
 from pyevent import Event, Dispatcher, Listener
 
 
+def call_deferred(event, deferred):
+    deferred.resolve()
+
 class DispatcherTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.mox = mox.Mox()
-        self.event = self.mox.CreateMock(Event)
-
-    def tearDown(self):
-        self.mox.UnsetStubs()
+        self.event = Event('test')
 
     def test_init_does_not_take_any_arguments(self):
         err = False
@@ -68,9 +76,9 @@ class DispatcherTestCase(unittest.TestCase):
         d.attach('test', 'c', 20)
 
         l = d.get_listeners('test')
-        self.assertEqual('a', l.next())
-        self.assertEqual('b', l.next())
-        self.assertEqual('c', l.next())
+        self.assertEqual('a', next(l))
+        self.assertEqual('b', next(l))
+        self.assertEqual('c', next(l))
 
     def test_get_listeners_always_returns_iterator(self):
         d = Dispatcher()
@@ -78,185 +86,111 @@ class DispatcherTestCase(unittest.TestCase):
         self.assertEqual(1, sum([1 for i in d.get_listeners('test')]))
         self.assertEqual(0, sum([1 for i in d.get_listeners('unknown')]))
 
-    def test_has_listeners_returns_integer(self):
+    def test_contains_checks_is_listener_exists(self):
         d = Dispatcher()
         d.attach('test', 'b')
-        self.assertTrue(d.has_listeners('test'))
-        self.assertFalse(d.has_listeners('unknown'))
+        self.assertTrue('test' in d)
+        self.assertFalse('unknown' in d)
 
-    def test_notify_expects_event_as_first_argument(self):
+    def test_notify_expects_2_arguments(self):
+        err = False
+        try:
+            Dispatcher().notify()
+        except TypeError:
+            err = True
+        self.assertTrue(err)
+    def test_notify_expects_2_arguments_1(self):
         err = False
         try:
             Dispatcher().notify('a')
-        except AttributeError:
-            err = True
-        self.assertTrue(err)
-
-    def test_notify_notifies_all_listeners(self):
-        # prepare dispatcher
-        d = Dispatcher()
-
-        # prepare listener
-        listener = Listener()
-        self.mox.StubOutWithMock(listener, 'mapping')
-        listener.foo = self.mox.CreateMockAnything()
-        listener.bar = self.mox.CreateMockAnything()
-        listener.foo(mox.IsA(Event))
-        listener.foo(mox.IsA(Event))
-        listener.mapping().AndReturn([('foo', listener.foo),\
-            ('foo', listener.foo)])
-        self.mox.ReplayAll()
-        listener.register(d)
-
-        # prepare event
-        self.event.name = 'foo'
-
-        # test
-        d.notify(self.event)
-
-        # verify
-        self.mox.VerifyAll()
-
-    def test_notify_until_expects_event_as_first_argument(self):
-        err = False
-        try:
-            Dispatcher().notify_until('a')
-        except AttributeError:
-            err = True
-        self.assertTrue(err)
-
-    def test_notify_until_notifies_listeners_until_one_returns_true(self):
-        # prepare dispatcher
-        d = Dispatcher()
-
-        # prepare event
-        self.event.name = 'foo'
-        self.event.mark_processed()
-
-        # prepare listener
-        listener = Listener()
-        self.mox.StubOutWithMock(listener, 'mapping')
-        listener.foo = self.mox.CreateMockAnything()
-        listener.bar = self.mox.CreateMockAnything()
-        listener.foo(mox.IsA(Event))
-        listener.bar(mox.IsA(Event)).AndReturn('a')
-        listener.mapping().AndReturn([('foo', listener.foo),\
-            ('foo', listener.bar),\
-            ('foo', listener.foo)])
-        self.mox.ReplayAll()
-        listener.register(d)
-
-        # test
-        d.notify_until(self.event)
-
-        # verify
-        self.mox.VerifyAll()
-
-    def test_notify_until_notifies_all_listeners_is_none_returned_true(self):
-        # prepare dispatcher
-        d = Dispatcher()
-
-        # prepare event
-        self.event.name = 'foo'
-
-        # prepare listener
-        listener = Listener()
-        self.mox.StubOutWithMock(listener, 'mapping')
-        listener.foo = self.mox.CreateMockAnything()
-        listener.bar = self.mox.CreateMockAnything()
-        listener.foo(mox.IsA(Event))
-        listener.bar(mox.IsA(Event))
-        listener.foo(mox.IsA(Event))
-        listener.mapping().AndReturn([('foo', listener.foo),\
-            ('foo', listener.bar),\
-            ('foo', listener.foo)])
-        self.mox.ReplayAll()
-        listener.register(d)
-
-        # test
-        d.notify_until(self.event)
-
-        # verify
-        self.mox.VerifyAll()
-
-    def test_filter_expects_2_arguments(self):
-        err = False
-        try:
-            Dispatcher().filter()
         except TypeError:
             err = True
         self.assertTrue(err)
 
-    def test_filter_expects_2_arguments_1(self):
+    def test_notify_expects_2_arguments_2(self):
         err = False
         try:
-            Dispatcher().filter(None)
-        except TypeError:
-            err = True
-        self.assertTrue(err)
-
-    def test_filter_expects_event_as_first_argument(self):
-        err = False
-        try:
-            Dispatcher().filter('a', 1)
+            Dispatcher().notify('a', self.event)
         except AttributeError:
             err = True
-        self.assertTrue(err)
+        self.assertFalse(err)
 
-    def test_filter_notifies_all_listeners(self):
+    def test_notify_starts_event_propagation(self):
+        self.event.stop_propagation()
+        Dispatcher().notify('a', self.event)
+        self.assertFalse(self.event.is_propagation_stopped())
+
+    def test_notify_sets_event_name(self):
+        self.assertIsNone(self.event.name)
+        Dispatcher().notify('a', self.event)
+        self.assertEqual('a', self.event.name)
+
+    def test_notify_returns_promise_instance(self):
+        self.assertTrue(isinstance(Dispatcher().notify('a', self.event),
+                Promise))
+
+    def test_notify_notifies_listeners_until_propagation_is_not_stopped(self):
         # prepare dispatcher
         d = Dispatcher()
 
-        # prepare event
-        self.event.name = 'foo'
+        foo = mock.MagicMock(side_effect=call_deferred)
+        bar = mock.MagicMock(side_effect=call_deferred)
 
         # prepare listener
         listener = Listener()
-        self.mox.StubOutWithMock(listener, 'mapping')
-        listener.foo = self.mox.CreateMockAnything()
-        listener.bar = self.mox.CreateMockAnything()
-        listener.foo(mox.IsA(Event), 1).AndReturn(1)
-        listener.bar(mox.IsA(Event), 1).AndReturn(1)
-        listener.foo(mox.IsA(Event), 1).AndReturn(1)
-        listener.mapping().AndReturn([('foo', listener.foo),\
-            ('foo', listener.bar),\
-            ('foo', listener.foo)])
-        self.mox.ReplayAll()
+        listener.mapping = mock.MagicMock(
+                return_value=[('foo', foo), ('foo', bar)])
         listener.register(d)
 
         # test
-        d.filter(self.event, 1)
+        d.notify('foo', self.event)
 
         # verify
-        self.mox.VerifyAll()
+        foo.assert_called_once_with(IsA(Event), deferred=IsA(Deferred))
+        bar.assert_called_once_with(IsA(Event), deferred=IsA(Deferred))
 
-    def test_filter_passes_received_value_to_following_listeners(self):
+    def test_notify_terminates_notification_when_event_propagation_is_stopped(
+            self):
         # prepare dispatcher
         d = Dispatcher()
 
-        # prepare event
-        self.event.name = 'foo'
+        def stop_propagation(event, deferred):
+            event.stop_propagation()
+            call_deferred(event, deferred)
+        foo = mock.MagicMock(side_effect=stop_propagation)
+        bar = mock.MagicMock(side_effect=call_deferred)
 
         # prepare listener
         listener = Listener()
-        self.mox.StubOutWithMock(listener, 'mapping')
-        listener.foo = self.mox.CreateMockAnything()
-        listener.bar = self.mox.CreateMockAnything()
-        listener.foo(mox.IsA(Event), 1).AndReturn(2)
-        listener.bar(mox.IsA(Event), 2).AndReturn(3)
-        listener.foo(mox.IsA(Event), 3).AndReturn(4)
-        listener.mapping().AndReturn([('foo', listener.foo),\
-            ('foo', listener.bar),\
-            ('foo', listener.foo)])
-        self.mox.ReplayAll()
+        listener.mapping = mock.MagicMock(
+                return_value=[('foo', foo), ('foo', bar)])
         listener.register(d)
 
         # test
-        o = d.filter(self.event, 1)
+        d.notify('foo', self.event)
 
         # verify
-        self.mox.VerifyAll()
-        self.assertEqual(4, o.return_value)
+        foo.assert_called_once_with(IsA(Event), deferred=IsA(Deferred))
+        bar.assert_never_called()
+
+    def test_notify_resolves_promise_when_finished(self):
+        # prepare dispatcher
+        d = Dispatcher()
+
+        foo = mock.MagicMock(side_effect=call_deferred)
+        cb = mock.MagicMock()
+
+        # prepare listener
+        listener = Listener()
+        listener.mapping = mock.MagicMock(return_value=[('foo', foo)])
+        listener.register(d)
+
+        # test
+        d.notify('foo', self.event).done(cb)
+
+        # verify
+        foo.assert_called_once_with(IsA(Event), deferred=IsA(Deferred))
+        cb.assert_called_once_with(IsA(Event))
 
 
 if "__main__" == __name__:

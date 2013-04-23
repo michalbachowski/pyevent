@@ -5,95 +5,64 @@
 # python standard library
 #
 import unittest
-import mox
 
 # hack for loading modules
-import _path
-_path.fix()
+from _path import fix, mock
+fix()
 
 ##
 # event modules
 #
-from pyevent import synchronous, asynchronous
+from pyevent import synchronous
+
+
+@synchronous
+def sync_notify(event):
+    return True
 
 
 class DecoratorsTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.mox = mox.Mox()
+        pass
 
-    def tearDown(self):
-        self.mox.UnsetStubs()
-
-    @synchronous
-    def sync_notify(self, event):
-        return True
-
-    @asynchronous
-    def async_notify(self, event, callback):
-        callback(True)
-
-    def test_synchronous_notify(self):
-        self.assertTrue(self.sync_notify('foo'))
-
-    def test_asynchronous_notify_requires_callback(self):
+    def test_synchronous_notify_requires_at_least_2_arguments(self):
         err = False
         try:
-            self.async_notify('foo')
-        except RuntimeError:
+            sync_notify()
+        except TypeError:
             err = True
         self.assertTrue(err)
 
-    def test_asynchronous_call_requires_callback_to_be_given_as_named_arg(self):
-        def callback(val):
-            pass
+    def test_synchronous_notify_requires_at_least_2_arguments_1(self):
         err = False
         try:
-            self.async_notify('foo', callback)
-        except RuntimeError:
+            sync_notify('foo')
+        except TypeError:
             err = True
         self.assertTrue(err)
 
-    def test_asynchronous_notify_calls_callback(self):
-        # prepare callback
-        callback = self.mox.CreateMockAnything()
-        callback(True)
-
-        self.mox.ReplayAll()
-
-        self.async_notify('foo', callback=callback)
-
-        self.mox.VerifyAll()
-
-    @synchronous
-    def sync_filter(self, event, val):
-        return val
-
-    @asynchronous
-    def async_filter(self, event, val, callback):
-        callback(val)
-
-    def test_synchronous_filter(self):
-        self.assertEquals('bar', self.sync_filter('foo', 'bar'))
-
-    def test_asynchronous_filter_requires_callback(self):
+    def test_synchronous_notify_requires_at_least_2_arguments_3(self):
         err = False
         try:
-            self.async_filter('foo', 'bar')
-        except RuntimeError:
+            sync_notify('foo', 'bar')
+        except AttributeError:
             err = True
         self.assertTrue(err)
 
-    def test_asynchronous_filter_calls_callback(self):
-        # prepare callback
-        callback = self.mox.CreateMockAnything()
-        callback('bar')
+    def test_synchronous_allows_to_pass_more_then_2_arguments(self):
+        cb = mock.MagicMock(return_value='asd')
+        d = mock.MagicMock()
+        d.resolve = mock.MagicMock()
+        synchronous(cb)('foo', d, 'baz', 1, 2, d='f')
+        cb.assert_called_once_with('foo', 'baz', 1, 2, d='f')
+        d.resolve.assert_called_once_with('asd')
 
-        self.mox.ReplayAll()
-
-        self.async_filter('foo', 'bar', callback=callback)
-
-        self.mox.VerifyAll()
+    def test_synchronous_resolves_given_deferred(self):
+        d = mock.MagicMock()
+        d.resolve = mock.MagicMock()
+        self.assertTrue(sync_notify('foo', d))
+        d.resolve.assert_called_once_with(True)
 
 
 if "__main__" == __name__:
