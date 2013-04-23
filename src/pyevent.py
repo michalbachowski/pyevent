@@ -176,8 +176,8 @@ def synchronous(function):
     It handles deferred object on behalf of decorated function
     """
     @wraps(function)
-    def wrapper(self, event, deferred, *args, **kwargs):
-        ret = function(self, event, *args, **kwargs)
-        deferred.done(ret)
+    def wrapper(event, deferred, *args, **kwargs):
+        ret = function(event, *args, **kwargs)
+        deferred.resolve(ret)
         return ret
     return wrapper
