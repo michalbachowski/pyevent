@@ -9,5 +9,6 @@
 [run]
 branch = True
 omit =
+    */.tox/*
     */test/*
     */dist-packages/*
