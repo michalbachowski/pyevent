@@ -143,23 +143,39 @@ class Dispatcher(object):
             deferred.resolve(event)
 
 
-class Listener(object):
+class Manager(object):
     """
-    Class that simplifies attaching listeners
+    Class that simplifies attaching listeners to dispatcher
     """
 
-    def register(self, dispatcher):
+    def __init__(self, dispatcher):
         """
-        Registers event listeners to given dispatcher
+        Class initialization
         """
         self.dispatcher = dispatcher
 
-        for t in self.mapping():
+    def register(self, listener):
+        """
+        Registers event listeners to given dispatcher
+        """
+        # try to set dispatcher
+        try:
+            listener.set_dispatcher(self.dispatcher)
+        except AttributeError:
+            pass
+
+        for t in listener.mapping():
             try:
                 priority = t[2]
             except IndexError:
                 priority = 100
-            dispatcher.attach(t[0], t[1], priority)
+            self.dispatcher.attach(t[0], t[1], priority)
+
+
+class Listener(object):
+    """
+    Class that defines simple interface for classes to work with Dispatcher
+    """
 
     def mapping(self):
         """
@@ -168,6 +184,19 @@ class Listener(object):
         """
         raise NotImplementedError('Return list of tuples with ' +\
             '(event, callback priority) mappings')
+
+
+class DispatcherAware(object):
+    """
+    Mixin for listeners that want to have dispatcher reference be given
+    """
+
+    def set_dispatcher(self, dispatcher):
+        """
+        Dispatcher setter
+        """
+        self.dispatcher = dispatcher
+        return self
 
 
 def synchronous(function):

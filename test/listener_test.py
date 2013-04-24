@@ -7,49 +7,24 @@
 import unittest
 
 # hack for loading modules
-from _path import fix, mock
+from _path import fix
 fix()
-
-##
-# test helper
-#
-from mock_helper import IsA
 
 ##
 # event modules
 #
-from pyevent import Dispatcher, Listener
+from pyevent import Listener
 
 
 class ListenerTestCase(unittest.TestCase):
 
-    def setUp(self):
-        self.dispatcher = Dispatcher()
-
-    def test_register_expects_mapping_to_be_implemented(self):
-        # prepare listener
-        listener = Listener()
-
-        # test
+    def test_mapping_must_be_implemented(self):
         err = False
         try:
-            listener.register(None)
-        except RuntimeError:
+            Listener().mapping()
+        except NotImplementedError:
             err = True
         self.assertTrue(err)
-
-    def test_register_calls_dispatcher_attach_method(self):
-        # prepare listener
-        listener = Listener()
-
-        listener.mapping = lambda: [('a', 1)]
-        self.dispatcher.attach = mock.MagicMock()
-
-        # test
-        listener.register(self.dispatcher)
-
-        # validate
-        self.dispatcher.attach.assert_called_once_with('a', 1, IsA(int))
 
 
 if "__main__" == __name__:

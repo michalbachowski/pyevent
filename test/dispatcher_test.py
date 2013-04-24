@@ -136,11 +136,8 @@ class DispatcherTestCase(unittest.TestCase):
         foo = mock.MagicMock(side_effect=call_deferred)
         bar = mock.MagicMock(side_effect=call_deferred)
 
-        # prepare listener
-        listener = Listener()
-        listener.mapping = mock.MagicMock(
-                return_value=[('foo', foo), ('foo', bar)])
-        listener.register(d)
+        d.attach('foo', foo)
+        d.attach('foo', bar)
 
         # test
         d.notify('foo', self.event)
@@ -160,11 +157,8 @@ class DispatcherTestCase(unittest.TestCase):
         foo = mock.MagicMock(side_effect=stop_propagation)
         bar = mock.MagicMock(side_effect=call_deferred)
 
-        # prepare listener
-        listener = Listener()
-        listener.mapping = mock.MagicMock(
-                return_value=[('foo', foo), ('foo', bar)])
-        listener.register(d)
+        d.attach('foo', foo)
+        d.attach('foo', bar)
 
         # test
         d.notify('foo', self.event)
@@ -180,10 +174,7 @@ class DispatcherTestCase(unittest.TestCase):
         foo = mock.MagicMock(side_effect=call_deferred)
         cb = mock.MagicMock()
 
-        # prepare listener
-        listener = Listener()
-        listener.mapping = mock.MagicMock(return_value=[('foo', foo)])
-        listener.register(d)
+        d.attach('foo', foo)
 
         # test
         d.notify('foo', self.event).done(cb)
