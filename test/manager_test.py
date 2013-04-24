@@ -69,7 +69,7 @@ class ManagerTestCase(unittest.TestCase):
     def test_register_calls_dispatcher_attach_method(self):
         Manager(self.dispatcher).register(self.listener)
         self.listener.mapping.assert_called_once_with()
-        self.dispatcher.attach.assert_called_once_with('a', 'b', IsA(int))
+        self.dispatcher.attach.assert_called_once_with('a', 'b', None)
 
     def test_register_tries_to_set_dispatcher_to_listener(self):
         Manager(self.dispatcher).register(self.listener)

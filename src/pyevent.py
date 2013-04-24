@@ -81,12 +81,15 @@ class Dispatcher(object):
         """
         self._listeners = {}
         self._dirty = False
+        self.priority = 400
         self.counter = itertools.count()
 
-    def attach(self, name, listener, priority=0):
+    def attach(self, name, listener, priority=None):
         """
         Attaches new listener to dispatcher
         """
+        if priority is None:
+            priority = self.priority
         if name not in self._listeners:
             self._listeners[name] = []
         heapq.heappush(self._listeners[name], self._prepare(listener, priority))
@@ -168,7 +171,7 @@ class Manager(object):
             try:
                 priority = t[2]
             except IndexError:
-                priority = 100
+                priority = None
             self.dispatcher.attach(t[0], t[1], priority)
 
 
