@@ -5,9 +5,6 @@ from __future__ import absolute_import
 import sys
 import unittest
 
-import _path
-_path.fix()
-
 TEST_MODULES = ['event_test', 'dispatcher_test', 'listener_test', \
         'decorators_test', 'manager_test', 'dispatcher_aware_test']
 

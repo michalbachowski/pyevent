@@ -6,14 +6,15 @@
 #
 import unittest
 
-# hack for loading modules
-from _path import fix, mock
-fix()
-
 ##
 # event modules
 #
 from pyevent import synchronous
+
+##
+# test helpers
+#
+from testutils import mock
 
 
 @synchronous

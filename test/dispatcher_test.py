@@ -6,14 +6,10 @@
 #
 import unittest
 
-# hack for loading modules
-from _path import fix, mock
-fix()
-
 ##
-# test helper
+# test helpers
 #
-from mock_helper import IsA
+from testutils import mock, IsA
 
 ##
 # pypromise modules
@@ -23,7 +19,7 @@ from promise import Deferred, Promise
 ##
 # event modules
 #
-from pyevent import Event, Dispatcher, Listener
+from pyevent import Event, Dispatcher
 
 
 def call_deferred(event, deferred):

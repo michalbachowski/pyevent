@@ -6,10 +6,6 @@
 #
 import unittest
 
-# hack for loading modules
-import _path
-_path.fix()
-
 ##
 # event modules
 #

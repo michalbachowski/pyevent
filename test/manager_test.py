@@ -6,14 +6,10 @@
 #
 import unittest
 
-# hack for loading modules
-from _path import fix, mock
-fix()
-
 ##
-# test helper
+# test helpers
 #
-from mock_helper import IsA
+from testutils import mock, IsA
 
 ##
 # event modules
