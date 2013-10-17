@@ -10,7 +10,7 @@ del os.link
 
 setup(name='PyEvent',
     url='https://github.com/michalbachowski/pyevent',
-    version='1.0',
+    version='1.0.0',
     description='Python implementation of PHP`s (from Symfony Components) EventDispatcher',
     license='New BSD License',
     author='Michał Bachowski',
